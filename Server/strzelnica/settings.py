@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'polls.apps.PollsConfig',
+    'DAS.apps.DASConfig',
 ]
 
 MIDDLEWARE = [
