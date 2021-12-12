@@ -13,5 +13,14 @@ def feed(request):
     return HttpResponse("OK")
 
 def get(request):
+    labels = [x['sensor_tick'] for x in Reading_db.objects.order_by('sensor_tick').values('sensor_tick').distinct()]
+    sensors = [x['sensor_id'] for x in Reading_db.objects.order_by('sensor_id').values('sensor_id').distinct()]
+    for sensor in sensors:
+        reading = 
+
+    labels = [x['sensor_tick'] for x in Reading_db.objects.order_by('sensor_tick').values('sensor_tick').distinct()]
     response= serializers.serialize("json",Reading_db.objects.all())
     return HttpResponse(response)
+
+def chart(request):
+    return render(request,'html/charts.html')
