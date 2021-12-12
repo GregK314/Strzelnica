@@ -1,19 +1,17 @@
 from django.http import HttpResponse
 from .models import Reading_db
 from django.shortcuts import get_object_or_404, render
+from django.core import serializers
 
 def feed(request):
-    if request.method == 'POST':
-        form = DinnerForm(request.POST)
-    if form.is_valid():
-        name = form.cleaned_data['name']
-        text = form.cleaned_data['text']
-        diner = Dinner.objects.create(
-                    name = name,
-                    text = text,)
+    if request.method == 'GET':
+        result = Reading_db.objects.create(
+            sensor_id= request.GET['sensor_id'],
+            sensor_reading= request.GET['sensor_reading'],
+            sensor_tick= request.GET['sensor_tick'])
+    print(result)
+    return HttpResponse("OK")
 
-    return HttpResponse(200)
-
-#def get(request):
-#    response = "You're looking at the results of question %s."
-#    return HttpResponse(response % question_id)
+def get(request):
+    response= serializers.serialize("json",Reading_db.objects.all())
+    return HttpResponse(response)
