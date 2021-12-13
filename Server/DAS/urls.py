@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     # ex: /polls/
     path('feed/', views.feed, name='feed'),
-    # ex: /polls/5/
+    path('feed_rand/', views.feed_rand, name='feed_rand'),
     path('get/', views.get, name='get'),
     path('', views.chart, name='chart'),
     

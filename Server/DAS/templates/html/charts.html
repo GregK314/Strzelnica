@@ -9,38 +9,56 @@
     <script src="{% static 'DAS/bootstrap-5.1.3-dist/js/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
     <script src="{% static 'DAS/chart.js-3.6.2/chart.min.js' %}" crossorigin="anonymous"></script>
     <script src="{% static 'DAS/jquery-3.6.0.min.js' %}" crossorigin="anonymous"></script>
-    <script src="{% static 'DAS/chart.js-3.6.2/chartjs-plugin-colorschemes.js' %}" crossorigin="anonymous"></script>
+    <! <script src="{% static 'DAS/lightweight-charts.standalone.production.js' %}" crossorigin="anonymous"></script> 
 </head>
 
 <body>
+<div class="row">
+    <div class="col col-lg-2 gap-3">
+        <div class="row m-1">
+            <div class="form-group">
+                <label for="test_run">Test run #:</label>
+                <input type="text" class="form-control" id="test_run">
+            </div>
+        </div>
+        <div class="row m-1">
+            <button type="button" class="btn btn-outline-primary" onclick="last_run()">Last test run</button>
+        </div>
+        <div class="row m-1">
+            <button type="button" class="btn btn-primary" onclick="show_run()">Show run</button>
+        </div>
+        <div class="row m-1">
+            <button type="button" class="btn btn-outline-warning" onclick="feed_rnd()">Feed typed run</button>
+        </div>
+        
+    </div>
+  <div class="col">
     <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+  </div>
+</div>
+
+    
+    
+    
+    
 </body>
 
 <script type="text/javascript">
     $(document).ready(function () {
-        init_chart()
-        read_database()
+    init_chart()
+    read_database('latest')
     });
     function init_chart() {
         var ctx = document.getElementById('myChart')
         window.myChart = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: [],
-                datasets: []
-            },
+            data: {abels: [],datasets: []},
             options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: false
-                        }
-                    }]
-                },
-                legend: {
-                    display: true
-                }
-            }
+                spanGaps: true,
+                scales: {yAxes: [{ticks: {beginAtZero: true}}]},
+                legend: {display: true},
+                elements: {point:{radius: 0}} 
+                    }
         })
 
     }
@@ -52,7 +70,9 @@
             }
 
         } else if (window.myChart.data.datasets.length > data.datasets.length) {
-
+            while (window.myChart.data.datasets.length > data.datasets.length) {
+                window.myChart.data.datasets.pop()
+            }
         }
         for (let i = 0; i < data.datasets.length; i++) {
             window.myChart.data.datasets[i].data = data.datasets[i].data
@@ -60,24 +80,39 @@
         }
         window.myChart.update()
     }
-    function generate_dataset() {
+    function generate_dataset(id) {
+        var Paired12 = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928','#fbb4ae', '#b3cde3', '#ccebc5']
+        //,/pointBackgroundColor: '#007bff'
         return {
             label: "",
             data: [],
             lineTension: 0,
             backgroundColor: 'transparent',
-            borderColor: '#007bff',
+            borderColor: Paired12[id],
             borderWidth: 4,
-            pointBackgroundColor: '#007bff'
+            
         }
     }
-    function read_database() {
-        $.get("get",
+    function read_database(test_run) {
+        $.get("get",'test_run='+test_run,
             function (data) {
                 update_chart(data)
+                $('#test_run')[0].value = data.test_run 
             });
     }
-
+    function last_run() {
+        read_database('latest')
+    }
+    function show_run() {
+        read_database($('#test_run')[0].value)
+    }
+    function feed_rnd() {
+        const tr = $('#test_run')[0].value
+        $.get("feed_rand",{'tr':tr ,'smp':1000},
+            function (data) {read_database(tr)}
+            );
+        
+    }
 </script>
 
 </html>
