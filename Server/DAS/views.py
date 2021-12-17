@@ -1,10 +1,15 @@
 from django.http import HttpResponse
 from .models import Reading_db
+from .models import Sensor_report_db
 from django.shortcuts import get_object_or_404, render
 from django.core import serializers
+from django.db.models import Count,Max
 from django.http import JsonResponse
 import random
 import time
+from datetime import datetime
+from django.forms.models import model_to_dict
+import json
 
 def feed_rand(request):
     start = time.time()
@@ -78,3 +83,29 @@ def get(request):
 
 def chart(request):
     return render(request, 'html/charts.html')
+
+def report_in(request):
+#http://0.0.0.0:3000/das/report_in/?s_id=1&s=1&ax=1&ay=2&az=3
+    if request.method == 'GET':
+        curr_dt = datetime.now()
+        timestamp = int(round(curr_dt.timestamp()))
+        result = Sensor_report_db.objects.create(
+            sensor_id=request.GET['s_id'],
+            status=request.GET['s'],
+            time_s=timestamp,
+            anglex=request.GET['ax'],
+            angley=request.GET['ay'],
+            anglez=request.GET['az'],
+            )
+    return HttpResponse("OK")
+
+def report_out(request):
+    if request.method == 'GET':
+        #'sensor_id','time','anglex','angley','anglez'
+        #'Select * from das_sensor_report_db order by time_s group by sensor_id'
+        #data = Sensor_report_db.objects.values('sensor_id','time').values('sensor_id').annotate(dummy=Count('sensor_id')).order_by()
+        data = Sensor_report_db.objects.raw('Select * from (Select * from das_sensor_report_db order by time_s desc) as foo group by foo.sensor_id')
+        rows = [model_to_dict(x) for x in data]
+        json_object = json.dumps(rows, indent = 4) 
+        print(json_object)
+    return HttpResponse(json_object)
