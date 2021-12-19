@@ -3,7 +3,7 @@ from .models import Reading_db
 from .models import Sensor_report_db
 from django.shortcuts import get_object_or_404, render
 from django.core import serializers
-from django.db.models import Count,Max
+from django.db.models import Count, Max
 from django.http import JsonResponse
 import random
 import time
@@ -11,16 +11,17 @@ from datetime import datetime
 from django.forms.models import model_to_dict
 import json
 
+
 def feed_rand(request):
     start = time.time()
     if request.method == 'GET':
-        testrun = int(request.GET['tr']) 
+        testrun = int(request.GET['tr'])
         samples = int(request.GET['smp'])
         labels = [x['sensor_tick'] for x in Reading_db.objects.filter(test_run=testrun).order_by('sensor_tick').values('sensor_tick')]
-        if len(labels)==0:
-            tick_base=1
+        if len(labels) == 0:
+            tick_base = 1
         else:
-            tick_base=labels[-1]
+            tick_base = labels[-1]
         objs = []
         print(samples)
         for i in range(samples):
@@ -49,17 +50,17 @@ def feed(request):
 
 def get(request):
     start = time.time()
-    if request.GET.get('test_run',0)==0:
+    if request.GET.get('test_run', 0) == 0:
         test_run = 'latest'
     else:
         test_run = request.GET['test_run']
     run_number = -1
     if test_run == 'latest':
         test_runs = [x['test_run'] for x in Reading_db.objects.order_by('test_run').values('test_run').distinct()]
-        run_number = test_runs[-1]    
+        run_number = test_runs[-1]
     else:
         run_number = int(test_run)
-        
+
     labels = [x['sensor_tick'] for x in Reading_db.objects.filter(test_run=run_number).order_by('sensor_tick').values('sensor_tick').distinct()]
     m_label_dict = {}
     datasets = []
@@ -75,7 +76,7 @@ def get(request):
             label_dict[r.sensor_tick] = r.sensor_reading
         data = list(label_dict.values())
         datasets.append({'label': "sensor " + str(sensor), 'data': data})
-    output = {'labels': labels, 'datasets': datasets, 'test_run':run_number}
+    output = {'labels': labels, 'datasets': datasets, 'test_run': run_number}
     end = time.time()
     print('get served time taken: '+str(end - start))
     return JsonResponse(output)
@@ -84,28 +85,28 @@ def get(request):
 def chart(request):
     return render(request, 'html/charts.html')
 
+
 def report_in(request):
-#http://0.0.0.0:3000/das/report_in/?s_id=1&s=1&ax=1&ay=2&az=3
+    # http://0.0.0.0:3000/das/report_in/?s_id=1&s=1&ax=1&ay=2&az=3
     if request.method == 'GET':
         curr_dt = datetime.now()
         timestamp = int(round(curr_dt.timestamp()))
         result = Sensor_report_db.objects.create(
             sensor_id=request.GET['s_id'],
-            status=request.GET['s'],
-            time_s=timestamp,
+            time_s=request.GET['ts'],
             anglex=request.GET['ax'],
             angley=request.GET['ay'],
             anglez=request.GET['az'],
-            )
-    return HttpResponse("OK")
+        )
+    return HttpResponse(timestamp)
+
 
 def report_out(request):
     if request.method == 'GET':
-        #'sensor_id','time','anglex','angley','anglez'
+        # 'sensor_id','time','anglex','angley','anglez'
         #'Select * from das_sensor_report_db order by time_s group by sensor_id'
         #data = Sensor_report_db.objects.values('sensor_id','time').values('sensor_id').annotate(dummy=Count('sensor_id')).order_by()
         data = Sensor_report_db.objects.raw('Select * from (Select * from das_sensor_report_db order by time_s desc) as foo group by foo.sensor_id')
         rows = [model_to_dict(x) for x in data]
-        json_object = json.dumps(rows, indent = 4) 
-        print(json_object)
+        json_object = json.dumps(rows, indent=4)
     return HttpResponse(json_object)
