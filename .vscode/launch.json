@@ -38,16 +38,14 @@
             "filterStderr": true,
             "args": []
         },
-        
-
-
         {
             "name": "Python: Django",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}\\Server\\manage.py",
             "args": [
-                "runserver"
+                "runserver",
+                "0:3000"
             ],
             "django": true
         }
