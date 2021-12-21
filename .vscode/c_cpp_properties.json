@@ -4,10 +4,13 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/home/pi/Downloads/arduino-1.8.16/libraries/",
-                "/home/pi/Downloads/arduino-1.8.16/libraries/WiFi/src",
-                "/home/pi/Downloads/arduino-1.8.16/hardware/arduino/avr/cores/arduino",
-                "/home/pi/Downloads/arduino-1.8.16/hardware/tools/avr/avr/include/avr"
+                "/usr/arduino-1.8.19/libraries/**",
+                "/usr/arduino-1.8.19/libraries/WiFi/src",
+                "/usr/arduino-1.8.19/hardware/arduino/avr/libraries/Wire/src",
+                "/usr/arduino-1.8.19/libraries/Adafruit_Circuit_Playground",
+                "/usr/arduino-1.8.19/libraries/Adafruit_Circuit_Playground/utility",
+                "/home/pi/Documents/Strzelnica/Sensors/Adafruit_ADXL345",
+                "/home/pi/.arduino15/packages/esp8266/hardware/esp8266/3.0.1/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

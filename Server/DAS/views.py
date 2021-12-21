@@ -39,12 +39,14 @@ def feed_rand(request):
 
 def feed(request):
     if request.method == 'GET':
+        curr_dt = datetime.now()
+        timestamp = int(round(curr_dt.timestamp()))
         result = Reading_db.objects.create(
             sensor_id=request.GET['sensor_id'],
             sensor_reading=request.GET['sensor_reading'],
             sensor_tick=request.GET['sensor_tick'],
             test_run=1)
-    return HttpResponse("OK")
+    return HttpResponse(timestamp)
 
 
 def get(request):
