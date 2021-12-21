@@ -43,8 +43,7 @@ def feed(request):
             sensor_id=request.GET['sensor_id'],
             sensor_reading=request.GET['sensor_reading'],
             sensor_tick=request.GET['sensor_tick'],
-            test_run=request.GET['test_run'])
-    print(result)
+            test_run=1)
     return HttpResponse("OK")
 
 

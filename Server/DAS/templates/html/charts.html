@@ -65,6 +65,7 @@
                         text += 'xyz: ' + e.anglex.toFixed(3) + ' ' + e.angley.toFixed(3) + ' ' + e.anglez.toFixed(3) + '\n'
                     });
                     $('#sensor_report_out')[0].value = text
+                    read_database('latest')
                 });
         }, 1000);
     });
