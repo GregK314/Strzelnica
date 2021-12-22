@@ -17,7 +17,7 @@ unsigned long time_gap = 0;
 int sensor_id = 1;
 int data_counter = 0;
 String serwer_url = "http://192.168.0.201:3000/";
-String sensor_data[1000][2];
+String sensor_data[100][2];
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(sensor_id);
 
 void setup()
@@ -79,7 +79,7 @@ String send_status(String ap_url, String status, String ax, String ay, String az
 
 void loop()
 {
-  if (data_counter == 1000)
+  if (data_counter == 100)
   {
     data_counter = 0;
     send_data()
@@ -105,7 +105,7 @@ void send_data()
 String array_to_JSON()
 {
   String json = ' {';
-  for (size_t i = 0; i < 1000; i++)
+  for (size_t i = 0; i < 100; i++)
   {
     json += "[" + sensor_data[i][0] + "," + sensor_data[i][1] + "]";
     if (i != 999)
