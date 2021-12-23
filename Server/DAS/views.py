@@ -11,6 +11,7 @@ import time
 from datetime import datetime
 from django.forms.models import model_to_dict
 import json
+from django.views.decorators.csrf import csrf_exempt
 
 
 def feed_rand(request):
@@ -27,7 +28,7 @@ def feed_rand(request):
         objs = []
         print(samples)
         for i in range(samples):
-            #objs.append([random.randint(1, 4),random.random()*100,random.randint(tick_base, tick_base+samples),1])
+            # objs.append([random.randint(1, 4),random.random()*100,random.randint(tick_base, tick_base+samples),1])
             objs.append(Reading_db(
                 sensor_id=random.randint(1, 4),
                 sensor_reading=random.random()*100,
@@ -39,16 +40,21 @@ def feed_rand(request):
     return HttpResponse(100)
 
 
+@csrf_exempt
 def feed(request):
-    if request.method == 'GET':
-        curr_dt = datetime.now()
-        timestamp = int(round(curr_dt.timestamp()))
-        result = Reading_db.objects.create(
-            sensor_id=request.GET['sensor_id'],
-            sensor_reading=request.GET['sensor_reading'],
-            sensor_tick=request.GET['sensor_tick'],
-            test_run=1)
-    return HttpResponse(uptime2())
+    if request.method == 'POST':
+        objs = []
+        s_data = json.loads(request.body.decode('utf-8'))
+        for data_row in s_data['s_data']:
+            objs.append(Reading_db(
+                sensor_id=s_data['sensor_id'],
+                sensor_reading=data_row[1],
+                sensor_tick=data_row[0],
+                test_run=s_data['test_id']))
+        result = Reading_db.objects.bulk_create(objs)
+    test_status = test_control_db.objects.filter(
+        ctrl_name="test_status")[0].ctrl_stat
+    return HttpResponse(str(uptime2())+","+str(test_status))
 
 
 def get(request):
@@ -116,16 +122,27 @@ def report_in(request):
         )
         test_status = test_control_db.objects.filter(
             ctrl_name="test_status")[0].ctrl_stat
-    return HttpResponse(uptime2()+","+str(test_status))
+        print(str(uptime2()) + "  " +
+              request.GET['ts'] + "  " + str(uptime2()-int(request.GET['ts'])))
+    return HttpResponse(str(uptime2())+","+str(test_status))
 
 
 def report_out(request):
     if request.method == 'GET':
         # 'sensor_id','time','anglex','angley','anglez'
-        #'Select * from das_sensor_report_db order by time_s group by sensor_id'
-        #data = Sensor_report_db.objects.values('sensor_id','time').values('sensor_id').annotate(dummy=Count('sensor_id')).order_by()
+        # 'Select * from das_sensor_report_db order by time_s group by sensor_id'
+        # data = Sensor_report_db.objects.values('sensor_id','time').values('sensor_id').annotate(dummy=Count('sensor_id')).order_by()
         data = Sensor_report_db.objects.raw(
             'Select * from (Select * from das_sensor_report_db order by time_s desc) as foo group by foo.sensor_id')
         rows = [model_to_dict(x) for x in data]
         json_object = json.dumps(rows, indent=4)
     return HttpResponse(json_object)
+
+
+def change_test_state(request):
+    # http://0.0.0.0:3000/change_test_state/?cs=1
+    obj, created = test_control_db.objects.update_or_create(
+        ctrl_name='test_status',
+        defaults={'ctrl_stat': request.GET['cs']}
+    )
+    return HttpResponse(100)

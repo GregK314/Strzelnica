@@ -14,7 +14,12 @@ HTTPClient http;
 long long tick_from_start;
 long long sync_timestamp;
 long long time_gap = 0;
+
+
 int sensor_id = 1;
+
+
+
 int data_counter = 0;
 int test_active = 0;
 String serwer_url = "http://192.168.0.201:3000/";
@@ -35,15 +40,18 @@ void setup()
   accel.setRange(ADXL345_RANGE_4_G);
   // DXL345_RANGE_8_G/ADXL345_RANGE_4_G/ADXL345_RANGE_2_G;
   sensors_event_t event;
-  while (test_active == 0)
+  await_test_activate();
+}
+void await_test_activate(){
+    while (test_active == 0)
   {
+    sensors_event_t event;
     accel.getEvent(&event);
-    response = send_status("report_in/", "1", String(event.acceleration.x), String(event.acceleration.y), String(event.acceleration.z), "Waiting_for_test_to_activate");
+    String response = send_status("report_in/", "1", String(event.acceleration.x), String(event.acceleration.y), String(event.acceleration.z), "Waiting_for_test_to_activate");
     test_active = getValue(response, ',', 1).toInt();
     delay(2000);
   }
 }
-
 void setup_wifi_and_timer()
 {
   String response = "";
@@ -59,37 +67,30 @@ void setup_wifi_and_timer()
   blink_established();
 
   response = send_status("report_in/", "1", "0", "0", "0", "Connected");
-  String timest = getValue(response, ',', 0);
-  char Buf[50];
-  timest.toCharArray(Buf, 32);
-  sync_timestamp = strtoul(Buf,NULL,10);
-  tick_from_start = millis();
-  
-  time_gap = sync_timestamp - tick_from_start;
-  char buf_tg[50];
-  sprintf(buf_tg, "%lu", time_gap); 
-  
-  Serial.print("\n resp:" + String(response)+"\n");
-  Serial.print("Buf: ");Serial.print(Buf);Serial.print("\n");
-  Serial.print("sync_timestamp: "); Serial.print(sync_timestamp);Serial.print(" tick_from_start:");
-  Serial.print(tick_from_start);Serial.print(" time gap: ");  Serial.print(buf_tg); Serial.print("\n");
-}
+  update_time_gap(response);
 
+  // Serial.print("\n resp:" + String(response)+"\n");
+  // Serial.print("Buf: ");Serial.print(Buf);Serial.print("\n");
+  // Serial.print("sync_timestamp: "); Serial.print(sync_timestamp);Serial.print(" tick_from_start:");
+  // Serial.print(tick_from_start);Serial.print(" time gap: ");  Serial.print(buf_tg); Serial.print("\n");
+}
+void update_time_gap(String response) {
+  sync_timestamp = getValue(response, ',', 0).toInt();
+  tick_from_start = millis();
+  time_gap = sync_timestamp - tick_from_start;
+  test_active = getValue(response, ',', 1).toInt();
+}
 String send_status(String ap_url, String stat, String ax, String ay, String az, String msg)
 {
   String url_txt = "";
-  Serial.print(" time gap: ");Serial.print(time_gap);
-  unsigned long active_time = millis() + time_gap;
-   Serial.print(" active_time: ");Serial.print(active_time);Serial.print("\n"); 
-  char buf_tg[50];
-  sprintf(buf_tg, "%lu", active_time);
-  
+  long active_time = millis() + time_gap;
+
   int httpCode = -1;
   String response = "";
   url_txt = serwer_url + ap_url +
             "?s_id=" + sensor_id +
             "&s=" + stat +
-            "&ts=" + buf_tg +
+            "&ts=" + String(active_time) +
             "&ax=" + ax +
             "&ay=" + ay +
             "&az=" + az +
@@ -107,6 +108,10 @@ String send_status(String ap_url, String stat, String ax, String ay, String az, 
 
 void loop()
 {
+  if (test_active==0) {
+    await_test_activate();
+    data_counter = 0;
+  }
   if (data_counter == 100)
   {
     data_counter = 0;
@@ -117,7 +122,7 @@ void loop()
     sensors_event_t event;
     accel.getEvent(&event);
     sensor_data[data_counter][0] = String(millis() + time_gap);
-    sensor_data[data_counter][0] = String(event.acceleration.x);
+    sensor_data[data_counter][1] = String(event.acceleration.x);
     data_counter++;
   }
   /* Get a new sensor event */
@@ -128,19 +133,22 @@ void send_data()
   http.begin(wifiClient, serwer_url + "feed/");
   http.addHeader("Content-Type", "application/json");
   int httpResponseCode = http.POST(array_to_JSON());
+  String response = http.getString();
+  update_time_gap(response);
   http.end();
 }
 String array_to_JSON()
 {
-  String json = " {";
+  String json = " {\"s_data\":[";
   for (size_t i = 0; i < 100; i++)
   {
     json += "[" + sensor_data[i][0] + "," + sensor_data[i][1] + "]";
-    if (i != 999)
+    if (i != 99)
     {
       json += ",";
     }
   }
+  json += "],\"test_id\":"+String(test_active)+",\"sensor_id\":"+String(sensor_id)+"}";
   return json;
 }
 void blink_established()
