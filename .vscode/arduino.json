@@ -1,3 +1,4 @@
 {
-    "board": "arduino:avr:leonardo"
+    "board": "arduino:avr:leonardo",
+    "sketch": "Sensors/gy_291/gy_291.ino"
 }

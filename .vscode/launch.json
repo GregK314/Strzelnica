@@ -42,7 +42,7 @@
             "name": "Python: Django",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}\\Server\\manage.py",
+            "program": "${workspaceFolder}/Server/manage.py",
             "args": [
                 "runserver",
                 "0:3000"
