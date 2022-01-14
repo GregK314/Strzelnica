@@ -44,8 +44,7 @@
             "request": "launch",
             "program": "${workspaceFolder}\\Server\\manage.py",
             "args": [
-                "runserver",
-                "0:3000"
+                "runserver"
             ],
             "django": true
         }

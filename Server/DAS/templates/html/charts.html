@@ -9,37 +9,53 @@
     <script src="{% static 'DAS/bootstrap-5.1.3-dist/js/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
     <script src="{% static 'DAS/chart.js-3.6.2/chart.min.js' %}" crossorigin="anonymous"></script>
     <script src="{% static 'DAS/jquery-3.6.0.min.js' %}" crossorigin="anonymous"></script>
-    <! <script src="{% static 'DAS/lightweight-charts.standalone.production.js' %}" crossorigin="anonymous">
-        </script>
+    <!-- <! <script src="{% static 'DAS/lightweight-charts.standalone.production.js' %}" crossorigin="anonymous">
+        </script> -->
 </head>
+<style>
+    .pojemnik {
+        width: 100px;
+        height: 100px;
+        background-color: black
+    }
+</style>
 
 <body>
     <div class="row">
-        <div class="col col-lg-2 gap-3">
-            <div class="row m-1">
-                <div class="form-group">
-                    <label for="test_run">Test run #:</label>
-                    <input type="text" class="form-control" id="test_run">
+        <div class="col col-lg-2 gap-3" id="kolumna1">
+            <div class="row m-1 align-items-end" id="rzad1">
+                <div class="col  gap-3">
+                    <label for="exampleInputEmail1" class="form-label">Test #:</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                </div>
+                <div class="col gap-3">
+                    <button type="button" class="btn btn-outline-primary">Start test</button>
                 </div>
             </div>
-            <div class="row m-1">
-                <button type="button" class="btn btn-outline-primary" onclick="last_run()">Last test run</button>
+            <div class="row m-1 align-items-end" id="rzad2">
+                <div class="col  gap-3">
+                    <label for="exampleInputEmail1" class="form-label small">Refresh int #:</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                </div>
+                <div class="col gap-3">
+                    <button type="button" class="btn btn-outline-primary">Start cycling</button>
+                </div>
+
             </div>
-            <div class="row m-1">
-                <button type="button" class="btn btn-primary" onclick="show_run()">Show run</button>
-            </div>
-            <div class="row m-1">
-                <button type="button" class="btn btn-outline-warning" onclick="feed_rnd()">Feed typed run</button>
-            </div>
-            <div class="row m-1">
-                <button type="button" class="btn btn-dark col-sm-5" onclick="report_in()">Report in</button>
-            </div>
-            <div class="row m-1">
-                <textarea class="form-control rounded-0" id="sensor_report_out" rows="3"></textarea>
+            <div class="row m-1 align-items-end" id="rzad3">
+                <div class="col gap-3">
+                    <div id="pojemniknasensor" class="pojemnik" style="width: auto;">
+                        <label class=text-white>SENSOR #1:</label>
+                    </div>
+                </div>
+                <div class="col gap-3">
+                    <div id="pojemniknasensor2" class="pojemnik" style="width: auto;">
+                    </div>
+                </div>
             </div>
 
         </div>
-        <div class="col">
+        <div class="col" id="kolumna2">
             <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
         </div>
     </div>
@@ -54,20 +70,20 @@
     $(document).ready(function () {
         init_chart()
         read_database('latest')
-        var intervalId = window.setInterval(function () {
-            $.get("report_out",
-                function (data) {
-                    data = JSON.parse(data)
-                    var text = ""
-                    data.forEach(e => {
-                        text += "id: " + e.sensor_id + '\n'
-                        text += 'toff: ' + (Date.now() - e.time_s) + '\n'
-                        text += 'xyz: ' + e.anglex.toFixed(3) + ' ' + e.angley.toFixed(3) + ' ' + e.anglez.toFixed(3) + '\n'
-                    });
-                    $('#sensor_report_out')[0].value = text
-                    read_database('latest')
-                });
-        }, 1000);
+        // var intervalId = window.setInterval(function () {
+        //     $.get("report_out",
+        //         function (data) {
+        //             data = JSON.parse(data)
+        //             var text = ""
+        //             data.forEach(e => {
+        //                 text += "id: " + e.sensor_id + '\n'
+        //                 text += 'toff: ' + (Date.now() - e.time_s) + '\n'
+        //                 text += 'xyz: ' + e.anglex.toFixed(3) + ' ' + e.angley.toFixed(3) + ' ' + e.anglez.toFixed(3) + '\n'
+        //             });
+        //             $('#sensor_report_out')[0].value = text
+        //             read_database('latest')
+        //         });
+        // }, 1000);
     });
 
 
