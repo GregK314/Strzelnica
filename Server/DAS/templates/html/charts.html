@@ -54,20 +54,20 @@
     $(document).ready(function () {
         init_chart()
         read_database('latest')
-        var intervalId = window.setInterval(function () {
-            $.get("report_out",
-                function (data) {
-                    data = JSON.parse(data)
-                    var text = ""
-                    data.forEach(e => {
-                        text += "id: " + e.sensor_id + '\n'
-                        text += 'toff: ' + (Date.now() - e.time_s) + '\n'
-                        text += 'xyz: ' + e.anglex.toFixed(3) + ' ' + e.angley.toFixed(3) + ' ' + e.anglez.toFixed(3) + '\n'
-                    });
-                    $('#sensor_report_out')[0].value = text
-                    read_database('latest')
-                });
-        }, 1000);
+    //     var intervalId = window.setInterval(function () {
+    //         $.get("report_out",
+    //             function (data) {
+    //                 data = JSON.parse(data)
+    //                 var text = ""
+    //                 data.forEach(e => {
+    //                     text += "id: " + e.sensor_id + '\n'
+    //                     text += 'toff: ' + (Date.now() - e.time_s) + '\n'
+    //                     text += 'xyz: ' + e.anglex.toFixed(3) + ' ' + e.angley.toFixed(3) + ' ' + e.anglez.toFixed(3) + '\n'
+    //                 });
+    //                 $('#sensor_report_out')[0].value = text
+    //                 read_database('latest')
+    //             });
+    //     }, 1000);
     });
 
 
@@ -130,8 +130,10 @@
     function read_database(test_run) {
         $.get("get", 'test_run=' + test_run,
             function (data) {
-                update_chart(data)
-                $('#test_run')[0].value = data.test_run
+                if (data.test_run != undefined) {
+                    update_chart(data)
+                    $('#test_run')[0].value = data.test_run
+                }
             });
     }
     function last_run() {

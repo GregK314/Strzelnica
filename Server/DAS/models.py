@@ -27,3 +27,4 @@ class test_control_db(models.Model):
 
     def __str__(self):
         return '{}'.format(self.ctrl_stat)
+

@@ -1,3 +1,4 @@
+
 from django.http import HttpResponse
 from .models import Reading_db
 from .models import Sensor_report_db
@@ -67,7 +68,10 @@ def get(request):
     if test_run == 'latest':
         test_runs = [x['test_run'] for x in Reading_db.objects.order_by(
             'test_run').values('test_run').distinct()]
-        run_number = test_runs[-1]
+        if test_runs==[]:
+            return JsonResponse({})
+        else:
+            run_number = test_runs[-1]   
     else:
         run_number = int(test_run)
 
@@ -121,7 +125,7 @@ def report_in(request):
                       },
         )
         test_status = test_control_db.objects.filter(
-            ctrl_name="test_status")[0].ctrl_stat
+            ctrl_name="Test active")[0].ctrl_stat
         print(str(uptime2()) + "  " +
               request.GET['ts'] + "  " + str(uptime2()-int(request.GET['ts'])))
     return HttpResponse(str(uptime2())+","+str(test_status))

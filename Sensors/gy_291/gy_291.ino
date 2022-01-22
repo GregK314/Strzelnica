@@ -122,7 +122,7 @@ void loop()
     sensors_event_t event;
     accel.getEvent(&event);
     sensor_data[data_counter][0] = String(millis() + time_gap);
-    sensor_data[data_counter][1] = String(event.acceleration.x);
+    sensor_data[data_counter][1] = String(event.acceleration.z);
     data_counter++;
   }
   /* Get a new sensor event */
